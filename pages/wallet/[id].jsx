@@ -18,7 +18,13 @@ function Wallet({id}) {
 
 
     const connection = useCallback(() => {
-        const provider = new ethers.providers.JsonRpcProvider();
+        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+        let signer;
+        provider.send("eth_requestAccounts", []).then(signer = provider.getSigner())
+        signer.getAddress().then(function(result){setWallet(result)})
+        
+
+        /*const provider = new ethers.providers.JsonRpcProvider();
         const signer = provider.getSigner()
         let wall;
         if(user.phrase != null){
@@ -34,12 +40,13 @@ function Wallet({id}) {
             console.log("hola")
         })
         .catch(alertService.error);
+        */
     });
 
     return (
         <Layout>
             <h1>Wallet</h1>
-            { wallet ? <> <h2>Your address is { wallet?.address }</h2> </>
+            { wallet ? <> <h2>Your address is { wallet }</h2> </>
             : <>
             <button onClick={connection} type="button"className="btn btn-secondary">Crear wallet</button>
             </>}
