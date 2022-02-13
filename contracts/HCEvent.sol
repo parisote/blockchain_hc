@@ -2,59 +2,39 @@
 pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract HCEvent is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, Ownable {
+contract HCEvent is Ownable{
+    enum TypeEvent { Empty, Allergic }
+
     using Counters for Counters.Counter;
+    Counters.Counter public _tokenIdCounter;
 
-    Counters.Counter private _tokenIdCounter;
+    struct Event{
+        uint id;
+        uint person_id;
+        TypeEvent type_event;
+        string uri;
+    }
 
-    constructor() ERC721("HCEvent", "HCE") {}
+    mapping(address => mapping(uint => Event)) public _events;
+    mapping(address => uint[]) public _events_by_owner;
 
-    function safeMint(address to, string memory uri) public onlyOwner {
-        uint256 tokenId = _tokenIdCounter.current();
+    event newEvent(address);
+
+    constructor(){}
+
+    function mintEvent(uint _person_id, TypeEvent _type, string memory _uri) public onlyOwner{
+        uint event_id = _tokenIdCounter.current();
+        _events[msg.sender][event_id] = Event(event_id, _person_id, _type, _uri);
+        _events_by_owner[msg.sender].push(event_id);
         _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+
+        emit newEvent(msg.sender);
     }
 
-    // The following functions are overrides required by Solidity.
-
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
-        internal
-        override(ERC721, ERC721Enumerable)
-    {
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
-
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
-    }
-
-    function burn(uint256 tokenId) public override onlyOwner{
-        _burn(tokenId);
-    }
-
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
-    {
-        return super.tokenURI(tokenId);
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
+    function _burnEvent(uint _id, address _from) public onlyOwner{
+        delete(_events[_from][_id]);     
     }
 }
