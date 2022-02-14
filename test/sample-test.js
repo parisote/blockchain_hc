@@ -1,19 +1,27 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Greeter", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, world!");
-    await greeter.deployed();
+describe("HC Events", function () {
 
-    expect(await greeter.greet()).to.equal("Hello, world!");
+  before(async function(){
+    [this.contrato, this.person_one, this.person_two] = await hre.ethers.getSigners();
+    const HCEvent = await ethers.getContractFactory("HCEvent");
+    this.contract = await HCEvent.deploy();
+    await this.contract.deployed();
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+    this.c_one = await this.contract.connect(this.person_one);
+    this.c_two = await this.contract.connect(this.person_two);
+  })
 
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
+  it("Mint events", async function () {
+    await this.contract.mintEvent(this.person_one.address, 1, 1, "https://ipfs.io/ipfs/QmUFbUjAifv9GwJo7ufTB5sccnrNqELhDMafoEmZdPPng7");
+    await this.contract.mintEvent(this.person_one.address, 1, 1, "https://ipfs.io/ipfs/QmUFbUjAifv9GwJo7ufTB5sccnrNqELhDMafoEmZdPPng7");
+    await this.contract.mintEvent(this.person_one.address, 1, 1, "https://ipfs.io/ipfs/QmUFbUjAifv9GwJo7ufTB5sccnrNqELhDMafoEmZdPPng7");
+    await this.contract.mintEvent(this.person_two.address, 2, 1, "https://ipfs.io/ipfs/QmUFbUjAifv9GwJo7ufTB5sccnrNqELhDMafoEmZdPPng7");
 
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
+    let evento = await this.c_one.getEvent(this.person_one.address, 2);
+    
+    let evento2 = await this.c_two.getEvent(this.person_two.address, 3);
+    console.log(evento2)
   });
 });

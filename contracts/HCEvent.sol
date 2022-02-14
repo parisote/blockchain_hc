@@ -25,13 +25,23 @@ contract HCEvent is Ownable{
 
     constructor(){}
 
-    function mintEvent(uint _person_id, TypeEvent _type, string memory _uri) public onlyOwner{
+    function mintEvent(address _from, uint _person_id, TypeEvent _type, string memory _uri) public onlyOwner{
         uint event_id = _tokenIdCounter.current();
-        _events[msg.sender][event_id] = Event(event_id, _person_id, _type, _uri);
-        _events_by_owner[msg.sender].push(event_id);
+        _events[_from][event_id] = Event(event_id, _person_id, _type, _uri);
+        _events_by_owner[_from].push(event_id);
         _tokenIdCounter.increment();
 
-        emit newEvent(msg.sender);
+        emit newEvent(_from);
+    }
+
+    function getIdEvents(address _from) public view returns(uint[] memory){
+        return _events_by_owner[_from];
+    }
+
+    function getEvent(address _from, uint id) public view returns(Event memory){
+        require(_from == msg.sender, "Can't get events that don't owner you");
+        require(_events[_from][id].person_id != 0, "Event don't exist");
+        return _events[_from][id];
     }
 
     function _burnEvent(uint _id, address _from) public onlyOwner{
