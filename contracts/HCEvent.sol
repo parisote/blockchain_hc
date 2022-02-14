@@ -35,6 +35,11 @@ contract HCEvent is Ownable{
     }
 
     function getIdEvents(address _from) public view returns(uint[] memory){
+        require(_from == msg.sender, "Can't get events that don't owner you");
+        return _events_by_owner[_from];
+    }
+
+    function getIdEventsByAddress(address _from) public view onlyOwner returns(uint[] memory){
         return _events_by_owner[_from];
     }
 
