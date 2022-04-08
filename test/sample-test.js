@@ -22,6 +22,8 @@ describe("HC Events", function () {
     let evento = await this.c_one.getEvent(this.person_one.address, 2);
     
     let evento2 = await this.c_two.getEvent(this.person_two.address, 3);
-    console.log(evento2)
+    
+    let result = await this.contract.getIdEventsByAddress(this.person_one.address);
+    console.log(result)
   });
 });

@@ -12,41 +12,44 @@ function Wallet({id}) {
     useEffect(() => {
         // fetch user and set default form values if in edit mode
         userService.getById(id)
-            .then(x => setUser(x))
+            .then(x => { setUser(x) })
             .catch(alertService.error)        
     }, []);
 
 
     const connection = useCallback(() => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+        /*const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
         let signer;
         provider.send("eth_requestAccounts", []).then(signer = provider.getSigner())
-        signer.getAddress().then(function(result){setWallet(result)})
-        
+        signer.getAddress().then(function(result){setWallet(result)})*/
 
-        /*const provider = new ethers.providers.JsonRpcProvider();
-        const signer = provider.getSigner()
+        const provider = new ethers.providers.JsonRpcProvider();
+        const signer = provider.getSigner();
         let wall;
+
         if(user.phrase != null){
             wall = ethers.Wallet.fromMnemonic(user.phrase).connect(provider)
         } else {
             wall = ethers.Wallet.createRandom().connect(provider) 
             user.privateKey = wall?.privateKey
-            user.phrase = wall?.mnemonic.phrase     
+            user.phrase = wall?.mnemonic.phrase
+            user.wallet = wall?.address
         }
+
         setWallet(wall);
+        
         userService.update(id, user)
         .then(() => {
             console.log("hola")
         })
         .catch(alertService.error);
-        */
+        
     });
 
     return (
         <Layout>
             <h1>Wallet</h1>
-            { wallet ? <> <h2>Your address is { wallet }</h2> </>
+            { user?.wallet ? <> <h2>Your address is { user.wallet }</h2> </>
             : <>
             <button onClick={connection} type="button"className="btn btn-secondary">Crear wallet</button>
             </>}
